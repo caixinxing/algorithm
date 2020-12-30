@@ -1,0 +1,227 @@
+package com.cxx.solution.partition;
+
+/**
+ *Strassen矩阵乘法
+ */
+public class Solution2 {
+
+    public static void main(String[] args) {
+        int[][] a =  new int[][]{
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6}
+        };
+//        int[][] a =  new int[][]{
+//                {1,1,1,1},
+//                {1,1,1,1},
+//                {1,1,1,1},
+//                {1,1,1,1}
+//        };
+        int[][] b =  new int[][]{
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4},
+                {3,4,5,6,3,4,5,6},
+                {1,2,3,4,1,2,3,4}
+        };
+//        int[][] b =  new int[][]{
+//                {1,1,1,1},
+//                {1,1,1,1},
+//                {1,1,1,1},
+//                {1,1,1,1}
+//        };
+
+        System.out.println("普通乘法：");
+        long s1 = System.currentTimeMillis();
+        int[][] mulMatrix = mulMatrix(a, b);
+        System.out.println("耗时："+(System.currentTimeMillis()-s1)+"ms");
+        for (int i = 0; i < mulMatrix.length; i++) {
+            for (int j = 0; j < mulMatrix.length; j++) {
+                System.out.print(mulMatrix[i][j]+" ");
+            }
+            System.out.println();
+        }
+        System.out.println("Strassen乘法：");
+        long s2 = System.currentTimeMillis();
+        int[][] strassenMatrix = strassenMatrix(a, b);
+        System.out.println("耗时："+(System.currentTimeMillis()-s2)+"ms");
+
+        for (int i = 0; i < strassenMatrix.length; i++) {
+            for (int j = 0; j < strassenMatrix.length; j++) {
+                System.out.print(strassenMatrix[i][j]+" ");
+            }
+            System.out.println();
+        }
+
+    }
+
+    /**
+     * strassen算法  时间复杂度O(n^2.81)
+     * @param a
+     * @param b
+     */
+    private static int[][] strassenMatrix(int[][] a , int [][] b){
+        int aM = a.length; //a矩阵的行数
+        int aN = a[0].length;//a矩阵的列数
+        int bM = b.length; //b矩阵的行数
+        int bN = b[0].length;//b矩阵的列数
+
+        if (aM == 1 || bM == 1) {
+            int[][] c = new int[aM][bN];
+            c[0][0] = a[0][0]*b[0][0];
+            return c;
+        }
+        int[][] A11 = divide(a,"1");
+        int[][] A12 = divide(a,"2");
+        int[][] A21 = divide(a,"3");
+        int[][] A22 = divide(a,"4");
+        int[][] B11 = divide(b,"1");
+        int[][] B12 = divide(b,"2");
+        int[][] B21 = divide(b,"3");
+        int[][] B22 = divide(b,"4");
+        int[][] M1 = strassenMatrix(A11,minus(B12,B22));
+        int[][] M2 = strassenMatrix(add(A11,A12),B22);
+        int[][] M3 = strassenMatrix(add(A21,A22),B11);
+        int[][] M4 = strassenMatrix(A22,minus(B21,B11));
+        int[][] M5 = strassenMatrix(add(A11,A22),add(B11,B22));
+        int[][] M6 = strassenMatrix(minus(A12,A22),add(B21,B22));
+        int[][] M7 = strassenMatrix(minus(A11,A21),add(B11,B12));
+        int[][] C11 = minus(add(add(M5,M4),M6),M2);
+        int[][] C12 = add(M1,M2);
+        int[][] C21 = add(M3,M4);
+        int[][] C22 = minus(minus(add(M5,M1),M3),M7);
+        return  merge(C11,C12,C21,C22);
+
+    }
+
+    //合并
+    private static int[][] merge(int[][] c11, int[][] c12, int[][] c21, int[][] c22) {
+        int m =c11.length + c12.length  ;//行
+        int n =c11[0].length + c12[0].length ;//列
+        int[][] res = new int[m][n];
+        for (int i = 0; i < c11.length; i++) { //左上
+            for (int j = 0; j < c11[0].length; j++) {
+                res[i][j] = c11[i][j];
+            }
+        }
+        for (int i = 0; i < c12.length; i++) {//右上
+            for (int j = c12[0].length; j < n; j++) {
+                res[i][j] = c12[i][j-c12[0].length];
+            }
+        }
+        for (int i = c11.length; i < m; i++) { //左下
+            for (int j = 0; j < c21[0].length; j++) {
+                res[i][j] = c21[i-c11.length][j];
+            }
+        }
+        for (int i = c11.length; i < m; i++) { //右下
+            for (int j = c11.length; j < n; j++) {
+                res[i][j] = c22[i-c11.length][j-c11.length];
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 矩阵a-b
+     * @param a
+     * @param b
+     * @return
+     */
+    private static int[][] minus(int[][] a , int[][] b){
+        int[][] res = new int[a.length][a.length];
+        for (int i = 0; i < res.length; i++) {
+            for (int j = 0; j < res.length; j++) {
+                res[i][j] = a[i][j] - b[i][j];
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 矩阵a+b
+     * @param a
+     * @param b
+     * @return
+     */
+    private static int[][] add(int[][] a , int[][] b){
+        int[][] res = new int[a.length][a.length];
+        for (int i = 0; i < res.length; i++) {
+            for (int j = 0; j < res.length; j++) {
+                res[i][j] = a[i][j] + b[i][j];
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 分成4个n/2阶矩阵
+     * @param matrix
+     * @param direct
+     * @return
+     */
+    private static int[][] divide(int[][] matrix,String direct){
+        int length = matrix.length/2;
+        int[][] res = new int[length][length];
+        if ("1".equals(direct)){//左上
+            for (int i = 0; i < length; i++) {
+                for (int j = 0; j < length; j++) {
+                    res[i][j] = matrix[i][j];
+                }
+            }
+
+        }else if ("2".equals(direct)){//右上
+            for (int i = 0; i < length; i++) {
+                for (int j = 0; j < length; j++) {
+                    res[i][j] = matrix[i][j+length];
+                }
+            }
+        }else if ("3".equals(direct)){//左下
+            for (int i = 0; i < length; i++) {
+                for (int j = 0; j < length; j++) {
+                    res[i][j] = matrix[i+length][j];
+                }
+            }
+
+        }else if ("4".equals(direct)){//右下
+            for (int i = 0; i < length; i++) {
+                for (int j = 0; j < length; j++) {
+                    res[i][j] = matrix[i+length][j+length];
+                }
+            }
+
+        }else return null;
+        return res;
+    }
+
+    /**
+     * 普通矩阵相乘  时间复杂度O(n^3)
+     * @param a
+     * @param b
+     */
+    private static int[][] mulMatrix(int[][] a , int [][] b){
+        int aM = a.length; //a矩阵的行数
+        int aN = a[0].length;//a矩阵的列数
+        int bM = b.length; //b矩阵的行数
+        int bN = b[0].length;//b矩阵的列数
+        int[][] c = new int[aM][bN];
+        for (int i = 0; i < aM; i++) {
+            for (int j = 0; j < bN; j++) {
+                //a的第一行与b的第一列相乘
+                for (int k = 0; k < aN; k++) {
+                    c[i][j] += a[i][k]*b[k][j];
+                }
+            }
+        }
+        return c;
+    }
+
+}
