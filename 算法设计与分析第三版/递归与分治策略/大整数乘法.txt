@@ -1,0 +1,42 @@
+package com.cxx.solution.partition;
+
+/**
+ * 大整数乘法  10进制
+ */
+public class Solution1 {
+
+    public static void main(String[] args) {
+        long a = 1234;
+        long b = 5678;
+        int n = 4;
+        System.out.println(divideAndConquer(a,b,n));
+    }
+
+    public static long divideAndConquer(long x , long y, int n){
+        //将a和b都分成n/2位
+        if ( n==1 ) return x*y;
+        long a = x / (long)((Math.pow(10,n / 2))); //x的a
+        long b = x % (long)((Math.pow(10,n / 2)));  //x的b
+        long c = y / (long)((Math.pow(10,n / 2))); //y的c
+        long d = y % (long)((Math.pow(10,n / 2))); //y的d
+
+        long ac = divideAndConquer(a,c,n/2);
+        long bd = divideAndConquer(b,d,n/2);
+        long abdc = divideAndConquer(a-b ,d-c,n/2);
+        return ac*(long)(Math.pow(10,n)) + (abdc + ac + bd)*((long)Math.pow(10,n/2)) + bd;
+    }
+
+    /**
+     * 判断一个整数的位数
+     * @param num
+     * @return
+     */
+    public static int calc(long num){
+        int n = 0;
+        while(num!=0){
+            num = num/10;
+            n++;
+        }
+        return n;
+    }
+}
