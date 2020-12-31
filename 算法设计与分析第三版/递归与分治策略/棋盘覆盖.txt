@@ -1,0 +1,106 @@
+package com.cxx.solution.partition;
+
+import javax.swing.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+/**
+ * 棋盘覆盖
+ */
+public class Solution3 {
+
+    public static void main(String[] args) {
+        int[][] chess = new int[16][16];
+        //0表示初始化  1表示特殊方格  2表示a型L 3表示b型L 4表示c型L 5表示d型L
+        //随机产生一个特殊方格
+        Random random = new Random();
+        int m = random.nextInt(chess.length - 1);
+        int n = random.nextInt(chess.length - 1);
+        chessBoard(chess,m,n,0,0);
+        for (int i = 0; i < chess.length; i++) {
+            for (int j = 0; j < chess[0].length; j++) {
+                System.out.print(chess[i][j]+"  ");
+            }
+            System.out.println();
+        }
+
+    }
+
+    /**
+     *
+     * @param chess
+     * @param m 特殊方格行索引
+     * @param n 特殊方格列索引
+     * @param s1    行开始
+     * @param s2    列开始
+     */
+    private static int[][] chessBoard(int[][] chess, int m, int n ,int s1,int s2){
+        //将棋盘划分成4块
+        int length = chess.length / 4;//长宽
+        if (length == 2){ //如果是田就不能再分割 四种L型自动填充
+
+            return;
+        }
+        //每一块都生成一个特殊方格
+        Map<String,Integer> map = generateGrid(chess,length,m,n,s1,s2);
+        int newM1 = map.get("m1");//左上
+        int newN1 = map.get("n1");
+        int newM2 = map.get("m2");//左下
+        int newN2 = map.get("n2");
+        int newM3 = map.get("m3");//右上
+        int newN3 = map.get("n3");
+        int newM4 = map.get("m4");//右下
+        int newN4 = map.get("n4");
+        Map<String,int[][]> chessMap= divide(chess,length);
+        int[][] leftTops = chessMap.get("leftTop");
+        //左上
+        int[][] leftTop= chessBoard(chess,newM1,newN1,s1,s2);
+        //左下
+        int[][] leftBottom = chessBoard(chess,newM2,newN2,length,s2);
+        //右上
+        int[][] rightTop = chessBoard(chess,newM3,newN3,s1,length);
+        //右下
+        int[][] rightBottom =chessBoard(chess,newM4,newN4,length,length);
+        //合并
+        return merge(leftTop,leftBottom,rightTop,rightBottom);
+
+    }
+
+    private static Map<String,int[][]> divide(int[][] chess, int length) {
+        return null;
+    }
+
+    private static int[][] merge(int[][] leftTop, int[][] leftBottom, int[][] rightTop, int[][] rightBottom) {
+        return null;
+    }
+
+    /**
+     * 生成特殊方格
+     * @param chess 长宽n/4的棋盘
+     * @param length  分裂成4个子棋盘，每个棋盘的长宽
+     * @param m
+     * @param n
+     * @param s1
+     * @param s2
+     */
+    private static Map<String,Integer> generateGrid(int[][] chess, int length, int m, int n ,int s1,int s2) {
+        Map<String, Integer> map = new HashMap<>();
+        //判断原特殊方格在田的哪个位置
+        if ( m >= 0 && m <= length && n>=0 && n<= length){ //原特殊方格在左上
+            map.put("m1",m);
+            map.put("n1",n);
+        }
+        if (m>=length && ){//原特殊方格在左下
+
+        }
+        if (){//原特殊方格在右上
+
+        }
+        if (){//原特殊方格在右下
+
+        }
+
+    }
+
+}
