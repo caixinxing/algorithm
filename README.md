@@ -1,2 +1,1 @@
-# leetcode_exercise
-leetcode练习
+# 算法练习
