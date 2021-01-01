@@ -1,6 +1,5 @@
 package com.cxx.solution.partition;
 
-import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -12,15 +11,19 @@ public class Solution3 {
 
     public static void main(String[] args) {
         int[][] chess = new int[16][16];
-        //0表示初始化  1表示特殊方格  2表示a型L 3表示b型L 4表示c型L 5表示d型L
+//        int[][] chess = new int[2][2];
+        //0表示初始化  1表示原特殊方格  2表示a型L 3表示b型L 4表示c型L 5表示d型L
         //随机产生一个特殊方格
         Random random = new Random();
-        int m = random.nextInt(chess.length - 1);
-        int n = random.nextInt(chess.length - 1);
-        chessBoard(chess,m,n,0,0);
-        for (int i = 0; i < chess.length; i++) {
-            for (int j = 0; j < chess[0].length; j++) {
-                System.out.print(chess[i][j]+"  ");
+        int m = random.nextInt(chess.length );
+        int n = random.nextInt(chess.length);
+//         m = 3;
+//         n = 0;
+        chess[m][n] =1;
+        int[][] newArr = chessBoard(chess, m, n);
+        for (int i = 0; i < newArr.length; i++) {
+            for (int j = 0; j < newArr[0].length; j++) {
+                System.out.print(newArr[i][j] + "  ");
             }
             System.out.println();
         }
@@ -32,18 +35,36 @@ public class Solution3 {
      * @param chess
      * @param m 特殊方格行索引
      * @param n 特殊方格列索引
-     * @param s1    行开始
-     * @param s2    列开始
      */
-    private static int[][] chessBoard(int[][] chess, int m, int n ,int s1,int s2){
-        //将棋盘划分成4块
-        int length = chess.length / 4;//长宽
-        if (length == 2){ //如果是田就不能再分割 四种L型自动填充
+    private static int[][] chessBoard(int[][] chess, int m, int n){
 
-            return;
+        if (chess.length == 2){ //如果是田就不能再分割 四种L型自动填充
+            if (m == 0 && n == 0){ //左上
+                chess[0][1] = 5;
+                chess[1][1] = 5;
+                chess[1][0] = 5;
+            }
+            if (m==1 && n==0){//左下
+                chess[0][1] = 3;
+                chess[1][1] = 3;
+                chess[0][0] = 3;
+            }
+            if (m==0 && n==1){//右上
+                chess[1][0] = 4;
+                chess[1][1] = 4;
+                chess[0][0] = 4;
+            }
+            if (m==1 && n==1){//右下
+                chess[1][0] = 2;
+                chess[0][1] = 2;
+                chess[0][0] = 2;
+            }
+            return chess;
         }
+        //将棋盘划分成4块
+        int length = chess.length / 2;//长宽
         //每一块都生成一个特殊方格
-        Map<String,Integer> map = generateGrid(chess,length,m,n,s1,s2);
+        Map<String,Integer> map = generateGrid(chess,length,m,n);
         int newM1 = map.get("m1");//左上
         int newN1 = map.get("n1");
         int newM2 = map.get("m2");//左下
@@ -54,25 +75,88 @@ public class Solution3 {
         int newN4 = map.get("n4");
         Map<String,int[][]> chessMap= divide(chess,length);
         int[][] leftTops = chessMap.get("leftTop");
+        Map<String,Integer> newCoord1 = findNewCoord(leftTops,newM1,newN1);
+        newM1=newCoord1.get("m") ;
+        newN1=newCoord1.get("n") ;
+        int[][] leftBottoms = chessMap.get("leftBottom");
+        Map<String,Integer> newCoord2 = findNewCoord(leftBottoms,newM2,newN2);
+        newM2=newCoord2.get("m") ;
+        newN2=newCoord2.get("n") ;
+        int[][] rightTops = chessMap.get("rightTop");
+        Map<String,Integer> newCoord3 = findNewCoord(rightTops,newM3,newN3);
+        newM3=newCoord3.get("m") ;
+        newN3=newCoord3.get("n") ;
+        int[][] rightBottoms = chessMap.get("rightBottom");
+        Map<String,Integer> newCoord4 = findNewCoord(rightBottoms,newM4,newN4);
+        newM4=newCoord4.get("m") ;
+        newN4=newCoord4.get("n") ;
         //左上
-        int[][] leftTop= chessBoard(chess,newM1,newN1,s1,s2);
+        int[][] leftTop= chessBoard(leftTops,newM1,newN1);
         //左下
-        int[][] leftBottom = chessBoard(chess,newM2,newN2,length,s2);
+        int[][] leftBottom = chessBoard(leftBottoms,newM2,newN2);
         //右上
-        int[][] rightTop = chessBoard(chess,newM3,newN3,s1,length);
+        int[][] rightTop = chessBoard(rightTops,newM3,newN3);
         //右下
-        int[][] rightBottom =chessBoard(chess,newM4,newN4,length,length);
+        int[][] rightBottom =chessBoard(rightBottoms,newM4,newN4);
         //合并
         return merge(leftTop,leftBottom,rightTop,rightBottom);
 
     }
 
+    private static Map<String, Integer> findNewCoord(int[][] chess, int m, int n) {
+        Map<String,Integer> coord = new HashMap<>();
+        for (int i = 0; i < chess.length; i++) {
+            for (int j = 0; j < chess[0].length; j++) {
+                if (chess[i][j] == 1 ||chess[i][j] == 2 ||chess[i][j] == 3 ||chess[i][j] == 4 ||chess[i][j] == 5){
+                    coord.put("m",i);
+                    coord.put("n",j);
+                    break;
+                }
+            }
+        }
+        return coord;
+    }
+
+    /**
+     * 分割成4个子棋盘
+     * @param chess
+     * @param length
+     * @return
+     */
     private static Map<String,int[][]> divide(int[][] chess, int length) {
-        return null;
+        Map<String,int[][]> chessMap = new HashMap<>();
+        int[][] leftTops = new int[length][length];
+        int[][] leftBottoms = new int[length][length];
+        int[][] rightTops = new int[length][length];
+        int[][] rightBottoms = new int[length][length];
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
+                leftTops[i][j] = chess[i][j];
+                leftBottoms[i][j] = chess[i+length][j];
+                rightTops[i][j] = chess[i][j+length];
+                rightBottoms[i][j] = chess[i+length][j+length];
+            }
+        }
+        chessMap.put("leftTop",leftTops);//左上
+        chessMap.put("leftBottom",leftBottoms);//左下
+        chessMap.put("rightTop",rightTops);//右上
+        chessMap.put("rightBottom",rightBottoms);//右下
+
+        return chessMap;
     }
 
     private static int[][] merge(int[][] leftTop, int[][] leftBottom, int[][] rightTop, int[][] rightBottom) {
-        return null;
+        int length = leftTop.length * 2;
+        int[][] chess = new int[length][length];
+        for (int i = 0; i < leftTop.length; i++) {
+            for (int j = 0; j < leftTop.length; j++) {
+                chess[i][j] = leftTop[i][j];
+                chess[i+leftTop.length][j] = leftBottom[i][j];
+                chess[i][j+leftTop.length] = rightTop[i][j];
+                chess[i+leftTop.length][j+leftTop.length] = rightBottom[i][j];
+            }
+        }
+        return chess;
     }
 
     /**
@@ -81,26 +165,65 @@ public class Solution3 {
      * @param length  分裂成4个子棋盘，每个棋盘的长宽
      * @param m
      * @param n
-     * @param s1
-     * @param s2
      */
-    private static Map<String,Integer> generateGrid(int[][] chess, int length, int m, int n ,int s1,int s2) {
+    private static Map<String,Integer> generateGrid(int[][] chess, int length, int m, int n) {
         Map<String, Integer> map = new HashMap<>();
         //判断原特殊方格在田的哪个位置
-        if ( m >= 0 && m <= length && n>=0 && n<= length){ //原特殊方格在左上
-            map.put("m1",m);
+        if ( m >= 0 && m <= length-1 && n>=0 && n<= length-1){ //原特殊方格在左上 生成d型L
+            map.put("m1",m);//左上
             map.put("n1",n);
+            map.put("m2",length); //左下
+            map.put("n2",length-1);
+            map.put("m3",length-1); //右上
+            map.put("n3",length);
+            map.put("m4",length); //右下
+            map.put("n4",length);
+            chess[length][length-1] = 5;
+            chess[length-1][length] = 5;
+            chess[length][length] = 5;
         }
-        if (m>=length && ){//原特殊方格在左下
+        if (m >= length && m <= chess.length-1 && n >=0 && n<=length-1){//原特殊方格在左下 生成b型L
+            map.put("m2",m-length);
+            map.put("n2",n);
+            map.put("m1",length-1); //左上
+            map.put("n1",length-1);
+            map.put("m3",length-1); //右上
+            map.put("n3",length);
+            map.put("m4",length); //右下
+            map.put("n4",length);
+            chess[length-1][length-1] = 3;
+            chess[length-1][length] = 3;
+            chess[length][length] = 3;
+
 
         }
-        if (){//原特殊方格在右上
-
+        if (m >= 0 && m <= length-1 && n>=length && n<= chess.length-1){//原特殊方格在右上 生成c型L
+            map.put("m3",m);
+            map.put("n3",n-length);
+            map.put("m1",length-1); //左上
+            map.put("n1",length-1);
+            map.put("m2",length); //左下
+            map.put("n2",length-1);
+            map.put("m4",length); //右下
+            map.put("n4",length);
+            chess[length-1][length-1] = 4;
+            chess[length][length-1] = 4;
+            chess[length][length] = 4;
         }
-        if (){//原特殊方格在右下
-
+        if (m >=length && m<= chess.length-1 && n>=length && n<= chess.length-1){//原特殊方格在右下 生成a型L
+            map.put("m4",m-length);
+            map.put("n4",n-length);
+            map.put("m1",length-1); //左上
+            map.put("n1",length-1);
+            map.put("m2",length); //左下
+            map.put("n2",length-1);
+            map.put("m3",length-1); //右上
+            map.put("n3",length);
+            chess[length-1][length-1] = 2;
+            chess[length][length-1] = 2;
+            chess[length-1][length] = 2;
         }
-
+        return map;
     }
 
 }
