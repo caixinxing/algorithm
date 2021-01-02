@@ -1,0 +1,64 @@
+package com.cxx.solution.partition;
+
+import java.util.Arrays;
+
+/**
+ * 归并排序
+ */
+public class Solution4 {
+    public static void main(String[] args) {
+        int[] arr = new int[]{10, 12, 8, 7, 5, 1, 50};
+        System.out.println(Arrays.toString(mergeSort(arr, 0, arr.length - 1)));
+    }
+
+    private static int[] mergeSort(int[] arr, int left, int right) {
+        if (arr.length == 1) return arr;
+        int mid = (left + right) / 2;
+        int[] divideLeft = divide(arr, left, mid);
+        int[] divideRight = divide(arr, mid + 1, right);
+        int[] leftArr = mergeSort(divideLeft, 0, divideLeft.length - 1);
+        int[] rightArr = mergeSort(divideRight, 0, divideRight.length - 1);
+        return merge(leftArr, rightArr);
+    }
+
+    private static int[] divide(int[] arr, int left, int right) {
+        int[] res = new int[right - left + 1];
+        for (int i = left; i <= right; i++) {
+            res[i - left] = arr[i];
+        }
+        return res;
+    }
+
+    private static int[] merge(int[] leftArr, int[] rightArr) {
+        int[] res = new int[leftArr.length + rightArr.length];
+        int m = 0, n = 0, k = 0;
+        while (m < leftArr.length || n < rightArr.length) {
+            if (m == leftArr.length) {
+                while (n < rightArr.length) {
+                    res[k] = rightArr[n];
+                    n++;
+                    k++;
+                }
+                continue;
+            }
+            if (n == rightArr.length) {
+                while (m < leftArr.length) {
+                    res[k] = leftArr[m];
+                    m++;
+                    k++;
+                }
+                continue;
+            }
+            if (leftArr[m] < rightArr[n]) {
+                res[k] = leftArr[m];
+                k++;
+                m++;
+            } else {
+                res[k] = rightArr[n];
+                k++;
+                n++;
+            }
+        }
+        return res;
+    }
+}
