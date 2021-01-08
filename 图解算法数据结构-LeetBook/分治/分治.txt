@@ -1,1 +1,81 @@
 
+package com.cxx.solution;
+
+/**
+ * 分治算法
+ * https://leetcode-cn.com/leetbook/read/illustration-of-algorithm
+ */
+public class Solution2 {
+
+    //Definition for a binary tree node.
+    static class TreeNode {
+        int val;
+        TreeNode left;
+        TreeNode right;
+
+        TreeNode(int x) {
+            val = x;
+        }
+
+        TreeNode(int x, TreeNode left, TreeNode right) {
+            this.val = x;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public static void main(String[] args) {
+//        int[] preorder = new int[]{3,9,20,15,7};
+//        int[] inorder = new int[]{9,3,15,20,7};
+//        int[] preorder = new int[]{1,2};
+//        int[] inorder = new int[]{1,2};
+//        buildTree(preorder,inorder);
+
+    }
+
+    /**
+     * 重建二叉树
+     * 输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+     * 例如，给出
+     * 前序遍历 preorder = [3,9,20,15,7]
+     * 中序遍历 inorder = [9,3,15,20,7]
+     * 返回如下的二叉树：
+     * <p>
+     * 3
+     * / \
+     * 9  20
+     * /  \
+     * 15   7
+     *
+     * @param preorder
+     * @param inorder
+     * @return
+     */
+    public static TreeNode buildTree(int[] preorder, int[] inorder) {
+        TreeNode treeNode = partition(preorder, inorder, 0,0, preorder.length - 1);
+        return treeNode;
+    }
+
+    public static TreeNode partition(int[] preorder, int[] inorder,int index, int left, int right) {
+        if (left>right) return null;
+        int rootVal = preorder[index];//根结点值
+        int mid = -1;
+        for (int i = 0; i < inorder.length; i++) {
+            if (rootVal == inorder[i]) {
+                mid = i;
+                break;
+            }
+        }
+        //左子树的根
+        int leftLength = mid - left + 1; //左子树的元素个数
+        int leftRootIndex = index + 1;
+        //右子树的根
+//        int rightLength = right - mid + 1;//右子树的元素个数
+        int rightRootIndex = leftRootIndex + leftLength -1;
+        TreeNode root = new TreeNode(rootVal);
+        root.left =  partition(preorder,inorder,leftRootIndex,left,mid-1);
+        root.right = partition(preorder,inorder,rightRootIndex,mid+1,right);
+        return root;
+    }
+
+}
